@@ -180,9 +180,17 @@ async function connectWallet() {
     if (typeof window.ethereum !== "undefined") {
         try {
             await window.ethereum.request({ method: "eth_requestAccounts" });
+            
+            // Wait for ethers to be available
+            if (typeof ethers === "undefined") {
+                console.error("Ethers.js is not loaded!");
+                return;
+            }
+
             const provider = new ethers.providers.Web3Provider(window.ethereum);
             const signer = provider.getSigner();
             const walletAddress = await signer.getAddress();
+
             document.getElementById("wallet-address").innerText = `Connected: ${walletAddress}`;
             console.log("Connected to:", walletAddress);
         } catch (error) {
@@ -192,7 +200,6 @@ async function connectWallet() {
         alert("MetaMask is not installed. Please install it.");
     }
 }
-
 
 // Airdrop tokens
 async function airdropTokens() {
