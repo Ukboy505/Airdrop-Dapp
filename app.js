@@ -177,17 +177,22 @@ let provider, signer, contract;
 
 // Connect to MetaMask
 async function connectWallet() {
-    if (window.ethereum) {
-        provider = new ethers.providers.Web3Provider(window.ethereum);
-        await provider.send("eth_requestAccounts", []);
-        signer = provider.getSigner();
-        document.getElementById("walletAddress").innerText = await signer.getAddress();
-        contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-        listenToEvents();
+    if (typeof window.ethereum !== "undefined") {
+        try {
+            await window.ethereum.request({ method: "eth_requestAccounts" });
+            const provider = new ethers.providers.Web3Provider(window.ethereum);
+            const signer = provider.getSigner();
+            const walletAddress = await signer.getAddress();
+            document.getElementById("wallet-address").innerText = `Connected: ${walletAddress}`;
+            console.log("Connected to:", walletAddress);
+        } catch (error) {
+            console.error("Connection failed:", error);
+        }
     } else {
-        alert("Please install MetaMask!");
+        alert("MetaMask is not installed. Please install it.");
     }
 }
+
 
 // Airdrop tokens
 async function airdropTokens() {
