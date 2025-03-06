@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Airdrop Contract UI</title>
+    <style>
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        header {
+            text-align: center;
+            padding: 20px;
+            background-color: #007bff;
+            color: white;
+            border-radius: 10px 10px 0 0;
+            margin-bottom: 20px;
+        }
+        header .wallet-status {
+            margin-top: 10px;
+        }
+        header button {
+            padding: 12px 24px;
+            background-color: #28a745;
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        header button:hover {
+            background-color: #218838;
+        }
+        nav {
+            margin: 20px 0;
+            text-align: center;
+            background-color: #e9ecef;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        nav button {
+            margin: 0 10px;
+            padding: 12px 24px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        nav button:hover {
+            background-color: #0056b3;
+        }
+        .section {
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+            display: none;
+        }
+        .section.active {
+            display: block;
+        }
+        .section h2 {
+            color: #007bff;
+            margin-bottom: 15px;
+        }
+        .section h3, .section h4 {
+            color: #333;
+            margin-top: 15px;
+            margin-bottom: 10px;
+        }
+        input, button {
+            padding: 12px;
+            margin: 5px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            border-radius: 10px;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .recipient-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .recipient-row input {
+            flex: 1;
+            margin-right: 10px;
+        }
+        #tx-status, #error-message {
+            margin-top: 15px;
+            padding: 12px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        #error-message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .wallet-instructions {
+            margin: 10px 0;
+            padding: 12px;
+            background-color: #e0f7fa;
+            border: 1px solid #b2ebf2;
+            border-radius: 5px;
+            text-align: left;
+            font-size: 14px;
+        }
+        .wallet-connected {
+            background-color: #007bff;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            display: inline-block;
+            margin-top: 10px;
+        }
+        .log-tabs {
+            display: flex;
+            margin-top: 20px;
+            background-color: #e9ecef;
+            border-radius: 5px 5px 0 0;
+        }
+        .log-tab {
+            padding: 12px 24px;
+            background-color: #ddd;
+            cursor: pointer;
+            border-radius: 5px 5px 0 0;
+            margin-right: 5px;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        .log-tab.active {
+            background-color: #007bff;
+            color: white;
+        }
+        .log-tab:hover {
+            background-color: #ccc;
+        }
+        .log-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 0 5px 5px 5px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .log-table th, .log-table td {
+            padding: 8px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        .log-table th {
+            background-color: #f2f2f2;
+        }
+        .event-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .event-error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .contract-info-card {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        @media (max-width: 600px) {
+            .recipient-row {
+                flex-direction: column;
+            }
+            input, button {
+                width: 100%;
+            }
+            nav button, .log-tab {
+                margin: 5px 0;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Airdrop Contract UI (Polygon Amoy)</h1>
+            <div class="wallet-status" id="wallet-status">
+                <button id="connect-wallet">Connect Wallet</button>
+                <div id="wallet-info" style="display: none;">
+                    <p id="connected-address" class="wallet-connected"></p>
+                    <button id="disconnect-wallet">Disconnect</button>
+                </div>
+                <div id="wallet-instructions" class="wallet-instructions" style="display: none;"></div>
+            </div>
+        </header>
+        <nav>
+            <button onclick="showSection('home')">Home</button>
+            <button onclick="showSection('owner')">Owner's Panel</button>
+            <button onclick="showSection('user')">User's Panel</button>
+        </nav>
+        <div id="home" class="section active">
+            <h2>Airdrop Contract Information</h2>
+            <p>Contract Address: <span id="hardcoded-address">Not Connected</span></p>
+            <div id="contract-info" class="contract-info-card"></div>
+            <div id="error-message"></div>
+        </div>
+        <div id="owner" class="section">
+            <h2>Owner's Panel</h2>
+            <div id="airdrop-management">
+                <h3>Airdrop Management</h3>
+                <h4>Manual Input</h4>
+                <div id="recipients">
+                    <div class="recipient-row">
+                        <input type="text" placeholder="Address">
+                        <input type="number" placeholder="Amount (Tokens, e.g., 1 for 1 token)" step="0.1">
+                        <button onclick="removeRecipient(this)">Remove</button>
+                    </div>
+                </div>
+                <button onclick="addRecipient()">Add Recipient</button>
+                <button id="remove-csv" onclick="clearRecipients()" style="display: none;">Remove CSV</button>
+                <p>Total: <span id="total-amount">0</span> Tokens</p>
+                <button onclick="performAirdrop()">Perform Airdrop</button>
+                <h4>Batch Input (Comma-Separated)</h4>
+                <input type="text" id="batch-input" placeholder="Address1,Amount1,Address2,Amount2,...">
+                <button onclick="performBatchAirdrop()">Airdrop from Batch</button>
+                <h4>CSV Upload</h4>
+                <input type="file" id="csv-upload" accept=".csv" onchange="processCSV(this.files[0])">
+                <button onclick="performCSVAirdrop()">Airdrop from CSV</button>
+            </div>
+            <div class="pause-unpause">
+                <h3>Contract Status</h3>
+                <p>Status: <span id="contract-status">Unknown</span></p>
+                <button onclick="togglePause()">Toggle Pause</button>
+            </div>
+            <div class="withdraw">
+                <h3>Withdraw Tokens</h3>
+                <input type="number" id="withdraw-amount" placeholder="Amount (Tokens, e.g., 1 for 1 token)" step="0.1">
+                <button onclick="withdrawTokens()">Withdraw</button>
+            </div>
+            <div id="tx-status"></div>
+            <div id="error-message" class="error"></div>
+        </div>
+        <div id="user" class="section">
+            <h2>User's Panel</h2>
+            <input type="text" id="check-address" placeholder="Enter address (leave blank for connected wallet)">
+            <button onclick="checkBalance()">Check Balance</button>
+            <div id="balance-result"></div>
+            <h3>Transfer Tokens</h3>
+            <input type="text" id="transfer-to" placeholder="Recipient Address">
+            <input type="number" id="transfer-amount" placeholder="Amount (Tokens, e.g., 1 for 1 token)" step="0.1">
+            <button onclick="transferTokens()">Transfer</button>
+            <div id="error-message" class="error"></div>
+        </div>
+        <div class="log-tabs">
+            <div class="log-tab active" onclick="showLogTab('admin-logs')">Admin Logs</div>
+            <div class="log-tab" onclick="showLogTab('user-logs')">User Logs</div>
+        </div>
+        <div id="admin-logs" class="log-content active">
+            <table class="log-table">
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>Event</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody id="admin-log-body"></tbody>
+            </table>
+        </div>
+        <div id="user-logs" class="log-content">
+            <table class="log-table">
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>Event</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody id="user-log-body"></tbody>
+            </table>
+        </div>
+    </div>
+    <script src="https://unpkg.com/web3@1.10.4/dist/web3.min.js"></script>
+    <script>
+        // Logging functions
+        function logAdmin(event, details, isSuccess = true) {
+            const logBody = document.getElementById('admin-log-body');
+            const row = document.createElement('tr');
+            row.className = isSuccess ? 'event-success' : 'event-error';
+            row.innerHTML = `<td>${new Date().toLocaleTimeString()}</td><td>${event}</td><td>${details}</td>`;
+            logBody.insertBefore(row, logBody.firstChild);
+        }
+
+        function logUser(event, details, isSuccess = true) {
+            const logBody = document.getElementById('user-log-body');
+            const row = document.createElement('tr');
+            row.className = isSuccess ? 'event-success' : 'event-error';
+            row.innerHTML = `<td>${new Date().toLocaleTimeString()}</td><td>${event}</td><td>${details}</td>`;
+            logBody.insertBefore(row, logBody.firstChild);
+        }
+
+        function showLogTab(tabId) {
+            document.querySelectorAll('.log-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.log-content').forEach(content => content.classList.remove('active'));
+            document.querySelector(`.log-tab[onclick="showLogTab('${tabId}')"]`).classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        function showError(section, message) {
+            const errorDiv = document.querySelector(`#${section} #error-message`);
+            if (errorDiv) {
+                errorDiv.textContent = message;
+                errorDiv.classList.add('error');
+                setTimeout(() => errorDiv.classList.remove('error'), 5000);
+            }
+            if (section === 'owner' || section === 'home') {
+                logAdmin('Error', message, false);
+            } else {
+                logUser('Error', message, false);
+            }
+        }
+
+        // Hardcoded contracts
+        const CONTRACT_ADDRESS = "0x51dc2d3c05e30ee913ebbf43f6c3fe190add590a";
+        const TOKEN_ADDRESS = "0x9a15aca3b949b057ff7c99df82675a4e3f4b553d";
+
+        // Airdrop ABI
+        const AirdropABI = [
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "tokenAddress",
+				"type": "address"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "hunter",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "reason",
+				"type": "string"
+			}
+		],
+		"name": "IsContract",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "account",
+				"type": "address"
+			}
+		],
+		"name": "Paused",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address[]",
+				"name": "hunters",
+				"type": "address[]"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256[]",
+				"name": "amounts",
+				"type": "uint256[]"
+			}
+		],
+		"name": "Success",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "account",
+				"type": "address"
+			}
+		],
+		"name": "Unpaused",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "owner",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "Withdrawn",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address[]",
+				"name": "hunters",
+				"type": "address[]"
+			},
+			{
+				"internalType": "uint256[]",
+				"name": "amounts",
+				"type": "uint256[]"
+			}
+		],
+		"name": "airdrop",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getBalance",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "owner",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "pause",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "paused",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "token",
+		"outputs": [
+			{
+				"internalType": "contract IERC20",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "totalDistributed",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "unpause",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_amount",
+				"type": "uint256"
+			}
+		],
+		"name": "withdraw",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	}
+];
+
+        const ERC20ABI = [
+            {"inputs":[{"internalType":"uint256","name":"initialSupply","type":"uint256"}],"stateMutability":"nonpayable","type":"constructor"},
+            {"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"spender","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Approval","type":"event"},
+            {"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":false,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Transfer","type":"event"},
+            {"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"address","name":"spender","type":"address"}],"name":"allowance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
+            {"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"approve","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},
+            {"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
+            {"inputs":[],"name":"decimals","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},
+            {"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},
+            {"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},
+            {"inputs":[],"name":"totalSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
+            {"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"transfer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},
+            {"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"value","type":"uint256"}],"name":"transferFrom","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"}
+        ];
+
+        let web3, contract, tokenContract, userAddress, contractBalance = '0', isPaused = false, tokenSymbol = '', decimals = 18;
+
+        // Wallet connection
+        document.getElementById('connect-wallet').addEventListener('click', async () => {
+            if (!window.ethereum) {
+                showWalletInstructions();
+                return;
+            }
+            try {
+                web3 = new Web3(window.ethereum);
+                await window.ethereum.request({ method: 'eth_requestAccounts' });
+                const accounts = await web3.eth.getAccounts();
+                userAddress = accounts[0];
+
+                const chainId = await web3.eth.getChainId();
+                if (chainId !== 80002) {
+                    try {
+                        await window.ethereum.request({
+                            method: 'wallet_switchEthereumChain',
+                            params: [{ chainId: '0x13882' }]
+                        });
+                    } catch (switchError) {
+                        if (switchError.code === 4902) {
+                            await window.ethereum.request({
+                                method: 'wallet_addEthereumChain',
+                                params: [{
+                                    chainId: '0x13882',
+                                    chainName: 'Polygon Amoy',
+                                    rpcUrls: ['https://rpc-amoy.polygon.technology/'],
+                                    nativeCurrency: { name: 'MATIC', symbol: 'MATIC', decimals: 18 },
+                                    blockExplorerUrls: ['https://amoy.polygonscan.com/']
+                                }]
+                            });
+                        } else {
+                            throw switchError;
+                        }
+                    }
+                }
+
+                contract = new web3.eth.Contract(AirdropABI, CONTRACT_ADDRESS);
+                tokenContract = new web3.eth.Contract(ERC20ABI, TOKEN_ADDRESS);
+
+                const [name, symbol, balance, total, paused, tokenDecimals] = await Promise.all([
+                    tokenContract.methods.name().call(),
+                    tokenContract.methods.symbol().call(),
+                    contract.methods.getBalance().call(),
+                    contract.methods.totalDistributed().call(),
+                    contract.methods.paused().call(),
+                    tokenContract.methods.decimals().call()
+                ]);
+
+                decimals = parseInt(tokenDecimals);
+                contractBalance = (parseInt(balance) / 10 ** decimals).toFixed(2);
+                isPaused = paused;
+                tokenSymbol = symbol;
+
+                document.getElementById('wallet-info').style.display = 'block';
+                document.getElementById('connected-address').innerHTML = `Connected Address: ${userAddress}<br>Connected`;
+                document.getElementById('connect-wallet').style.display = 'none';
+                document.getElementById('disconnect-wallet').style.display = 'inline-block';
+                document.getElementById('hardcoded-address').textContent = CONTRACT_ADDRESS;
+                document.getElementById('contract-info').innerHTML = `
+                    <p>Token Name: ${name}</p>
+                    <p>Token Symbol: ${symbol}</p>
+                    <p>Contract Balance: ${contractBalance} ${symbol}</p>
+                    <p>Total Distributed: ${(parseInt(total) / 10 ** decimals).toFixed(2)} ${symbol}</p>
+                    <p>Contract Status: ${paused ? 'Paused' : 'Unpaused'}</p>
+                `;
+                document.getElementById('contract-status').textContent = paused ? 'Paused' : 'Unpaused';
+
+                contract.events.Success({ fromBlock: 'latest' })
+                    .on('data', (event) => {
+                        const totalAmount = event.returnValues.amounts.reduce((sum, val) => sum + parseInt(val), 0) / 10 ** decimals;
+                        logAdmin('Airdrop Success', `${event.returnValues.hunters.length} recipients, Total: ${totalAmount} ${tokenSymbol}`);
+                    });
+                contract.events.Paused({ fromBlock: 'latest' })
+                    .on('data', (event) => logAdmin('Contract Paused', `By ${event.returnValues.account}`));
+                contract.events.Unpaused({ fromBlock: 'latest' })
+                    .on('data', (event) => logAdmin('Contract Unpaused', `By ${event.returnValues.account}`));
+                contract.events.Withdrawn({ fromBlock: 'latest' })
+                    .on('data', (event) => logAdmin('Withdraw', `${(parseInt(event.returnValues.amount) / 10 ** decimals).toFixed(2)} ${tokenSymbol} by ${event.returnValues.owner}`));
+
+                tokenContract.events.Transfer({ filter: { from: userAddress }, fromBlock: 'latest' })
+                    .on('data', (event) => logUser('Transfer', `${(parseInt(event.returnValues.value) / 10 ** decimals).toFixed(2)} ${tokenSymbol} to ${event.returnValues.to}`))
+                    .on('error', (error) => logUser('Transfer Error', error.message, false));
+
+                logAdmin('Wallet Connected', `Connected to ${userAddress}`);
+            } catch (error) {
+                logAdmin('Connection Error', error.message, false);
+                showError('home', "Failed to connect wallet: " + error.message);
+            }
+        });
+
+        document.getElementById('disconnect-wallet').addEventListener('click', () => {
+            userAddress = null;
+            contract = null;
+            tokenContract = null;
+            document.getElementById('wallet-info').style.display = 'none';
+            document.getElementById('connect-wallet').style.display = 'inline-block';
+            document.getElementById('disconnect-wallet').style.display = 'none';
+            document.getElementById('hardcoded-address').textContent = 'Not Connected';
+            document.getElementById('contract-info').innerHTML = '';
+            document.getElementById('contract-status').textContent = 'Unknown';
+            document.getElementById('tx-status').textContent = '';
+            document.getElementById('balance-result').innerHTML = '';
+            document.getElementById('admin-log-body').innerHTML = '';
+            document.getElementById('user-log-body').innerHTML = '';
+            logAdmin('Wallet Disconnected', 'Disconnected successfully');
+        });
+
+        function showWalletInstructions() {
+            const instructions = document.getElementById('wallet-instructions');
+            instructions.style.display = 'block';
+            instructions.innerHTML = `<p>Please install MetaMask from <a href="https://metamask.io" target="_blank">metamask.io</a>.</p>`;
+        }
+
+        // Section navigation
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(section => section.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
+            logAdmin('Section Changed', `Switched to ${sectionId}`);
+        }
+
+        // Helper function to convert tokens to wei-like units safely
+        function toWeiLike(amount, decimals) {
+            const [integerPart, fractionalPart = ''] = amount.toString().split('.');
+            const paddedFraction = fractionalPart.padEnd(decimals, '0').slice(0, decimals);
+            return web3.utils.toBN(integerPart + paddedFraction);
+        }
+
+        // Airdrop management
+        function addRecipient() {
+            const row = document.createElement('div');
+            row.className = 'recipient-row';
+            row.innerHTML = `
+                <input type="text" placeholder="Address">
+                <input type="number" placeholder="Amount (Tokens, e.g., 1 for 1 token)" step="0.1">
+                <button onclick="removeRecipient(this)">Remove</button>
+            `;
+            document.getElementById('recipients').appendChild(row);
+            updateTotal();
+        }
+
+        function removeRecipient(button) {
+            button.parentElement.remove();
+            updateTotal();
+        }
+
+        function clearRecipients() {
+            document.getElementById('recipients').innerHTML = `
+                <div class="recipient-row">
+                    <input type="text" placeholder="Address">
+                    <input type="number" placeholder="Amount (Tokens, e.g., 1 for 1 token)" step="0.1">
+                    <button onclick="removeRecipient(this)">Remove</button>
+                </div>
+            `;
+            document.getElementById('total-amount').textContent = '0';
+            document.getElementById('remove-csv').style.display = 'none';
+            logAdmin('Recipients Cleared', 'Manual inputs and CSV data removed');
+        }
+
+        function updateTotal() {
+            const amounts = Array.from(document.querySelectorAll('#recipients input[type="number"]'))
+                .map(input => parseFloat(input.value) || 0);
+            const total = amounts.reduce((sum, val) => sum + val, 0);
+            document.getElementById('total-amount').textContent = total.toFixed(2);
+        }
+
+        async function performAirdrop() {
+            if (!contract) return showError('owner', 'Please connect your wallet first!');
+            try {
+                const hunters = Array.from(document.querySelectorAll('#recipients input[type="text"]')).map(input => input.value.trim());
+                const amounts = Array.from(document.querySelectorAll('#recipients input[type="number"]')).map(input => {
+                    const value = parseFloat(input.value) || 0;
+                    if (isNaN(value) || value <= 0) throw new Error(`Invalid amount: ${input.value}`);
+                    return toWeiLike(value, decimals).toString();
+                });
+                const total = parseFloat(document.getElementById('total-amount').textContent);
+                if (total > parseFloat(contractBalance)) return showError('owner', 'Total exceeds contract balance');
+                if (hunters.some(h => !web3.utils.isAddress(h))) return showError('owner', 'Invalid address detected');
+
+                document.getElementById('tx-status').textContent = 'Pending...';
+                const gasPrice = await web3.eth.getGasPrice();
+                const tx = await contract.methods.airdrop(hunters, amounts).send({ from: userAddress, gasPrice });
+                document.getElementById('tx-status').innerHTML = `Success! Tx: <a href="https://amoy.polygonscan.com/tx/${tx.transactionHash}" target="_blank">${tx.transactionHash}</a>`;
+                logAdmin('Airdrop Success', `Tx: <a href="https://amoy.polygonscan.com/tx/${tx.transactionHash}" target="_blank">${tx.transactionHash}</a>`);
+                updateContractInfo();
+            } catch (error) {
+                document.getElementById('tx-status').textContent = '';
+                logAdmin('Airdrop Error', error.message, false);
+                showError('owner', "Airdrop failed: " + error.message);
+            }
+        }
+
+        async function processCSV(file) {
+            if (!file) return showError('owner', 'Please select a CSV file');
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const text = e.target.result;
+                const lines = text.split('\n').map(line => line.trim()).filter(line => line);
+                const recipientsDiv = document.getElementById('recipients');
+                recipientsDiv.innerHTML = '';
+                lines.forEach(line => {
+                    const [address, amount] = line.split(',').map(item => item.trim());
+                    if (web3.utils.isAddress(address) && !isNaN(parseFloat(amount))) {
+                        const row = document.createElement('div');
+                        row.className = 'recipient-row';
+                        row.innerHTML = `
+                            <input type="text" value="${address}" placeholder="Address">
+                            <input type="number" value="${amount}" placeholder="Amount (Tokens, e.g., 1 for 1 token)" step="0.1">
+                            <button onclick="removeRecipient(this)">Remove</button>
+                        `;
+                        recipientsDiv.appendChild(row);
+                    }
+                });
+                updateTotal();
+                document.getElementById('remove-csv').style.display = 'inline-block';
+                logAdmin('CSV Processed', `${lines.length} entries loaded`);
+            };
+            reader.readAsText(file);
+        }
+
+        async function performCSVAirdrop() {
+            performAirdrop();
+        }
+
+        async function performBatchAirdrop() {
+            if (!contract) return showError('owner', 'Please connect your wallet first!');
+            try {
+                const batchInput = document.getElementById('batch-input').value.trim();
+                const pairs = batchInput.split(',').map(item => item.trim());
+                if (pairs.length % 2 !== 0) throw new Error('Invalid batch input format');
+                const hunters = [];
+                const amounts = [];
+                for (let i = 0; i < pairs.length; i += 2) {
+                    const address = pairs[i];
+                    const amount = parseFloat(pairs[i + 1]) || 0;
+                    if (!web3.utils.isAddress(address)) throw new Error(`Invalid address: ${address}`);
+                    if (amount <= 0) throw new Error(`Invalid amount: ${amount}`);
+                    hunters.push(address);
+                    amounts.push(toWeiLike(amount, decimals).toString());
+                }
+                const total = hunters.reduce((sum, _, i) => sum + parseFloat(pairs[i + 1]), 0);
+                if (total > parseFloat(contractBalance)) throw new Error('Total exceeds contract balance');
+
+                document.getElementById('tx-status').textContent = 'Pending...';
+                const gasPrice = await web3.eth.getGasPrice();
+                const tx = await contract.methods.airdrop(hunters, amounts).send({ from: userAddress, gasPrice });
+                document.getElementById('tx-status').innerHTML = `Success! Tx: <a href="https://amoy.polygonscan.com/tx/${tx.transactionHash}" target="_blank">${tx.transactionHash}</a>`;
+                logAdmin('Batch Airdrop Success', `Tx: <a href="https://amoy.polygonscan.com/tx/${tx.transactionHash}" target="_blank">${tx.transactionHash}</a>`);
+                updateContractInfo();
+            } catch (error) {
+                document.getElementById('tx-status').textContent = '';
+                logAdmin('Batch Airdrop Error', error.message, false);
+                showError('owner', "Batch airdrop failed: " + error.message);
+            }
+        }
+
+        async function togglePause() {
+            if (!contract) return showError('owner', 'Please connect your wallet first!');
+            try {
+                document.getElementById('tx-status').textContent = 'Pending...';
+                const gasPrice = await web3.eth.getGasPrice();
+                const method = isPaused ? contract.methods.unpause() : contract.methods.pause();
+                const tx = await method.send({ from: userAddress, gasPrice });
+                isPaused = !isPaused;
+                document.getElementById('contract-status').textContent = isPaused ? 'Paused' : 'Unpaused';
+                document.getElementById('tx-status').innerHTML = `Success! Tx: <a href="https://amoy.polygonscan.com/tx/${tx.transactionHash}" target="_blank">${tx.transactionHash}</a>`;
+                logAdmin('Pause Toggled', `${isPaused ? 'Paused' : 'Unpaused'} - Tx: <a href="https://amoy.polygonscan.com/tx/${tx.transactionHash}" target="_blank">${tx.transactionHash}</a>`);
+                updateContractInfo();
+            } catch (error) {
+                document.getElementById('tx-status').textContent = '';
+                logAdmin('Toggle Pause Error', error.message, false);
+                showError('owner', "Toggle pause failed: " + error.message);
+            }
+        }
+
+        async function withdrawTokens() {
+            if (!contract) return showError('owner', 'Please connect your wallet first!');
+            const amount = document.getElementById('withdraw-amount').value;
+            if (!amount || parseFloat(amount) <= 0) return showError('owner', 'Invalid amount');
+            try {
+                document.getElementById('tx-status').textContent = 'Pending...';
+                const gasPrice = await web3.eth.getGasPrice();
+                const weiAmount = toWeiLike(amount, decimals).toString();
+                const tx = await contract.methods.withdraw(weiAmount).send({ from: userAddress, gasPrice });
+                document.getElementById('tx-status').innerHTML = `Success! Tx: <a href="https://amoy.polygonscan.com/tx/${tx.transactionHash}" target="_blank">${tx.transactionHash}</a>`;
+                logAdmin('Withdraw Success', `Withdrew ${amount} ${tokenSymbol} - Tx: <a href="https://amoy.polygonscan.com/tx/${tx.transactionHash}" target="_blank">${tx.transactionHash}</a>`);
+                updateContractInfo();
+            } catch (error) {
+                document.getElementById('tx-status').textContent = '';
+                logAdmin('Withdraw Error', error.message, false);
+                showError('owner', "Withdraw failed: " + error.message);
+            }
+        }
+
+        async function checkBalance() {
+            if (!tokenContract) return showError('user', 'Please connect your wallet first!');
+            const addr = document.getElementById('check-address').value.trim() || userAddress;
+            if (!web3.utils.isAddress(addr)) return showError('user', 'Invalid address');
+            try {
+                const bal = await tokenContract.methods.balanceOf(addr).call();
+                const tokenBal = (parseInt(bal) / 10 ** decimals).toFixed(2);
+                document.getElementById('balance-result').innerHTML = `Balance: ${tokenBal} ${tokenSymbol}`;
+                logUser('Balance Checked', `Address: ${addr}, Balance: ${tokenBal} ${tokenSymbol}`);
+            } catch (error) {
+                logUser('Balance Check Error', error.message, false);
+                showError('user', "Balance check failed: " + error.message);
+            }
+        }
+
+        async function transferTokens() {
+            if (!tokenContract) return showError('user', 'Please connect your wallet first!');
+            const toAddress = document.getElementById('transfer-to').value.trim();
+            const amount = document.getElementById('transfer-amount').value;
+            if (!web3.utils.isAddress(toAddress)) return showError('user', 'Invalid recipient address');
+            if (!amount || parseFloat(amount) <= 0) return showError('user', 'Invalid amount');
+            try {
+                const gasPrice = await web3.eth.getGasPrice();
+                const weiAmount = toWeiLike(amount, decimals).toString();
+                const tx = await tokenContract.methods.transfer(toAddress, weiAmount).send({ from: userAddress, gasPrice });
+                logUser('Transfer Success', `Transferred ${amount} ${tokenSymbol} to ${toAddress} - Tx: <a href="https://amoy.polygonscan.com/tx/${tx.transactionHash}" target="_blank">${tx.transactionHash}</a>`);
+                checkBalance();
+            } catch (error) {
+                logUser('Transfer Error', error.message, false);
+                showError('user', "Transfer failed: " + error.message);
+            }
+        }
+
+        async function updateContractInfo() {
+            if (!contract) return;
+            try {
+                const [balance, total, paused] = await Promise.all([
+                    contract.methods.getBalance().call(),
+                    contract.methods.totalDistributed().call(),
+                    contract.methods.paused().call()
+                ]);
+                contractBalance = (parseInt(balance) / 10 ** decimals).toFixed(2);
+                isPaused = paused;
+                document.getElementById('contract-info').innerHTML = `
+                    <p>Token Name: ${await tokenContract.methods.name().call()}</p>
+                    <p>Token Symbol: ${tokenSymbol}</p>
+                    <p>Contract Balance: ${contractBalance} ${tokenSymbol}</p>
+                    <p>Total Distributed: ${(parseInt(total) / 10 ** decimals).toFixed(2)} ${tokenSymbol}</p>
+                    <p>Contract Status: ${paused ? 'Paused' : 'Unpaused'}</p>
+                `;
+                document.getElementById('contract-status').textContent = paused ? 'Paused' : 'Unpaused';
+            } catch (error) {
+                showError('home', "Error updating contract info: " + error.message);
+            }
+        }
+
+        // Initial log
+        logAdmin('Page Loaded', 'DApp initialized');
+    </script>
+</body>
+</html>
